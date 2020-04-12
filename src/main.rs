@@ -36,7 +36,7 @@ async fn index3() -> impl Responder {
         .read_to_string(&mut s)
         .unwrap();
     let data: astrology::Data = serde_json::from_str(&s).unwrap();
-    let path_str: String = format!("{:?}/swissephem-for-astroloy-crate/", env::current_dir().unwrap());
+    let path_str: String = format!("{:?}/../../swissephem-for-astroloy-crate/", env::current_dir().unwrap());
     let d = DataChartNatalC {
         year: data.year,
         month: data.month,
