@@ -36,7 +36,7 @@ async fn index3() -> impl Responder {
         .read_to_string(&mut s)
         .unwrap();
     let data: astrology::Data = serde_json::from_str(&s).unwrap();
-    let path_str: &str = "/Users/stephanebressani/Code/Flutter/astro/ios/EphemFiles/";
+    let path_str: String = format!("{:?}/swissephem-for-astroloy-crate/", env::current_dir().unwrap());
     let d = DataChartNatalC {
         year: data.year,
         month: data.month,
@@ -48,7 +48,7 @@ async fn index3() -> impl Responder {
         lat: data.lat,
         lng: data.lng,
     };
-    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(1000.0, d, &path_str);
+    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(1000.0, d, path_str.as_str());
     let mut svg_res: String = "".to_string();
     for r in res.clone() {
         if r.object_type == DataObjectType::Chart {
