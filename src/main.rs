@@ -12,7 +12,7 @@ use std::io::Read;
 use std::path::PathBuf;
 
 struct AppState {
-    foo: String,
+    _foo: String,
 }
 /*
 async fn index() -> impl Responder {
@@ -36,7 +36,8 @@ async fn index3() -> impl Responder {
         .read_to_string(&mut s)
         .unwrap();
     let data: astrology::Data = serde_json::from_str(&s).unwrap();
-    let path_str: String = format!("{:?}/../../swissephem-for-astroloy-crate/", env::current_dir().unwrap());
+    let path_str: String = format!("{}/swisseph-for-astrology-crate/", env::current_dir().unwrap().as_path().display().to_string());
+    println!("{}", path_str);
     let d = DataChartNatalC {
         year: data.year,
         month: data.month,
@@ -92,7 +93,7 @@ fn app_config(config: &mut web::ServiceConfig) {
     config.service(
         web::scope("")
             .data(AppState {
-                foo: "bar".to_string(),
+                _foo: "bar".to_string(),
             })
             .service(web::resource("/").route(web::get().to(index)))
             .service(index3)
