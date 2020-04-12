@@ -24,7 +24,7 @@ async fn index2() -> impl Responder {
 }
 */
 
-#[get("/hello")]
+#[get("/api/hello")]
 async fn index3() -> impl Responder {
     const PATH: &str = "data.json";
     let mut s = String::new();
