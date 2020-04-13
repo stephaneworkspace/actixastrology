@@ -124,7 +124,7 @@ async fn handle_post_natal_chart(params: web::Form<MyParams>, data: web::Data<Mu
     data.hour = params.hour;
     data.hourf32 = params.hourf32;
     data.min = params.min;
-    let svg = "<img src=\"http://0.0.0.0:8088/api/svg/natal.svg\"/>";
+    let svg = "<img src=\"svg/natal.svg\"/>";
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(format!("<html>Your year is {}{}<br />{}</html>", params.year, data.year, svg)))
