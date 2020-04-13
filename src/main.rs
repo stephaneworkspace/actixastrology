@@ -21,7 +21,7 @@ struct AppState {
     min: i32,
 }
 
-
+/// Natal svg
 #[get("/api/svg/natal.svg")]
 async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
     let data = data.lock().unwrap();
@@ -73,6 +73,7 @@ async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
         .body(svg_res)
 }
 
+/// Main
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -88,6 +89,7 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
+/// Configuration
 fn app_config(config: &mut web::ServiceConfig) {
     let data = web::Data::new(Mutex::new(AppState {
                 year: 2000,
@@ -106,12 +108,14 @@ fn app_config(config: &mut web::ServiceConfig) {
         );
 }
 
+/// Form
 async fn index() -> Result<HttpResponse> {
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(include_str!("../static/form.html")))
 }
 
+/// Handle form
 async fn handle_post_natal_chart(params: web::Form<MyParams>, data: web::Data<Mutex<AppState>>) -> Result<HttpResponse> {
     let mut data = data.lock().unwrap();
     data.year = params.year;
@@ -126,7 +130,7 @@ async fn handle_post_natal_chart(params: web::Form<MyParams>, data: web::Data<Mu
         .body(format!("<html>Your year is {}{}<br />{}</html>", params.year, data.year, svg)))
 }
 
-
+/// Form params
 #[derive(Serialize, Deserialize)]
 pub struct MyParams {
     year: i32,
@@ -136,4 +140,3 @@ pub struct MyParams {
     hourf32: f64,
     min: i32,
 }
-
