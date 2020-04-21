@@ -3,7 +3,8 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 use actix_web::{middleware, get, web, App, HttpResponse, HttpServer, Responder, Result}; 
-use astrology::svg_draw::{ DataChartNatalC, DataObjectSvg, DataObjectType};
+use astrology::svg_draw::{DataChartNatal, DataObjectSvg, DataObjectType};
+use libswe_sys::sweconst::Language;
 use base64::encode;
 use serde::{Deserialize, Serialize}; 
 use std::env;
@@ -17,7 +18,7 @@ struct AppState {
     month: i32,
     day: i32,
     hour: i32,
-    hourf32: f64,
+    hourf32: f32,
     min: i32,
 }
 
@@ -34,10 +35,10 @@ async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
         .unwrap()
         .read_to_string(&mut s)
         .unwrap();
-    let a_data: astrology::Data = serde_json::from_str(&s).unwrap();
+    let a_data: DataChartNatal= serde_json::from_str(&s).unwrap();
     let path_str: String = format!("{}/swisseph-for-astrology-crate/", env::current_dir().unwrap().as_path().display().to_string());
     println!("{}", path_str);
-    let d = DataChartNatalC {
+    let d = DataChartNatal {
         year: data.year,
         month: data.month,
         day: data.day,
@@ -48,7 +49,7 @@ async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
         lat: a_data.lat,
         lng: a_data.lng,
     };
-    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(1000.0, d, path_str.as_str());
+    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(1000.0, d, path_str.as_str(), Language::French);
     let mut svg_res: String = "".to_string();
     for r in res.clone() {
         if r.object_type == DataObjectType::Chart {
@@ -137,6 +138,6 @@ pub struct MyParams {
     month: i32,
     day: i32,
     hour: i32,
-    hourf32: f64,
+    hourf32: f32,
     min: i32,
 }
