@@ -2,6 +2,7 @@ extern crate base64;
 extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
+use actix_cors::Cors;
 use actix_web::{middleware, get, web, App, HttpResponse, HttpServer, Responder, Result}; 
 use astrology::svg_draw::{DataChartNatal, DataObjectSvg, DataObjectType};
 use libswe_sys::sweconst::Language;
@@ -77,8 +78,16 @@ async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
 /// Main
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
+    // Log
+    std::env::set_var("RUST_LOG", "actix_web=info");
+    // env_logger::init(); Not compile, but interessant skills
+
+    // Server
     HttpServer::new(|| {
         App::new()
+            .wrap(
+                // Cors::new().support_credentials().finish()) Interessant
+                Cors::new().finish())
             .wrap(middleware::Logger::default())
             .configure(app_config)
             //.service(index3)
