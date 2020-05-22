@@ -185,13 +185,10 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyParams>, data: web::Dat
         svg_res = "<svg>".to_string();
     }
     svg_res = format!("{}</svg>", svg_res);
-    Ok(HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
-        .body(format!("Your year is {}-{}<br />", params.year, data.year)))
  
-    // Ok(HttpResponse::Ok()
-    //    .content_type("image/svg+xml")
-    //    .body(svg_res))
+     Ok(HttpResponse::Ok()
+        .content_type("image/svg+xml")
+        .body(svg_res))
 }
 
 /// Form params
