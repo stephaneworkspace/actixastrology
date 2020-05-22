@@ -85,7 +85,8 @@ async fn main() -> std::io::Result<()> {
             //.route("/", web::get().to(index))
             //.route("/again", web::get().to(index2))
     })
-    .bind("0.0.0.0:8088")?
+    .bind("92.222.64.94:8088")?
+    //.bind("0.0.0.0:8088")?
     .run()
     .await
 }
