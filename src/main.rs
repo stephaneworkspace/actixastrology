@@ -105,7 +105,8 @@ fn app_config(config: &mut web::ServiceConfig) {
             .app_data(data.clone())
             .service(web::resource("/api/").route(web::get().to(index)))
             .service(index3)
-            .service(web::resource("/api/natal_chart").route(web::post().to(handle_post_natal_chart))),
+            .service(web::resource("/api/natal_chart").route(web::post().to(handle_post_natal_chart)))
+            .service(web::resource("/api/svg_chart").route(web::post().to(handle_post_natal_chart_svg))),
         );
 }
 
@@ -129,6 +130,64 @@ async fn handle_post_natal_chart(params: web::Form<MyParams>, data: web::Data<Mu
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(format!("<html>Your year is {}{}<br />{}</html>", params.year, data.year, svg)))
+}
+
+/// Svg only
+async fn handle_post_natal_chart_svg(params: web::Form<MyParams>, data: web::Data<Mutex<AppState>>) -> Result<HttpResponse> {
+    let mut data = data.lock().unwrap();
+    data.year = params.year;
+    data.month = params.month;
+    data.day = params.day;
+    data.hour = params.hour;
+    data.min = params.min;
+
+    // Copy past index3
+    const PATH: &str = "data.json";
+    let mut s = String::new();
+    let mut file_path = PathBuf::new();
+    file_path.push(env::current_dir().unwrap().as_path());
+    file_path.push(PATH);
+    File::open(file_path.as_path())
+        .unwrap()
+        .read_to_string(&mut s)
+        .unwrap();
+    let a_data: DataChartNatal= serde_json::from_str(&s).unwrap();
+    let path_str: String = format!("{}/swisseph-for-astrology-crate/", env::current_dir().unwrap().as_path().display().to_string());
+    println!("{}", path_str);
+    let d = DataChartNatal {
+        year: data.year,
+        month: data.month,
+        day: data.day,
+        hourf32: 0.0,
+        hour: data.hour,
+        min: data.min,
+        sec: a_data.sec,
+        lat: a_data.lat,
+        lng: a_data.lng,
+    };
+    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(600.0, d, path_str.as_str(), Language::French);
+    let mut svg_res: String = "".to_string();
+    for r in res.clone() {
+        if r.object_type == DataObjectType::Chart {
+            svg_res = r.svg;
+        }
+    }
+    if svg_res != "" {
+        svg_res = svg_res.replace("</svg>", "");
+        for r in res {
+            if r.object_type != DataObjectType::Chart {
+                // to do better inside after for real use
+                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()));
+            }
+        }
+    } else {
+        svg_res = "<svg>".to_string();
+    }
+    svg_res = format!("{}</svg>", svg_res);
+ 
+    Ok(HttpResponse::Ok()
+        .content_type("image/svg+xml")
+        .body(svg_res))
 }
 
 /// Form params
