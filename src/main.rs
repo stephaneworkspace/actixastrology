@@ -176,7 +176,7 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
         svg_res = svg_res.replace("</svg>", "");
         for r in res {
             if r.object_type != DataObjectType::Chart {
-                if params.aspect == 0 {
+                if params.aspect == 0 && r.object_type == DataObjectType::Aspect {
                 } else {
                 // to do better inside after for real use
                 svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()));
