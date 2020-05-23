@@ -154,7 +154,7 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
         lat: params.lat,
         lng: params.lng,
     };
-    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(600.0, d, path_str.as_str(), Language::French);
+    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(1000.0, d, path_str.as_str(), Language::French);
     let mut svg_res: String = "".to_string();
     for r in res.clone() {
         if r.object_type == DataObjectType::Chart {
@@ -346,7 +346,7 @@ async fn handle_post_natal_chart_svg_transit(params: web::Form<MyTransitParams>,
         lat: params.lat_t,
         lng: params.lng_t,
     };
-    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart_with_transit(600.0, d, d_t, path_str.as_str(), Language::French);
+    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart_with_transit(1000.0, d, d_t, path_str.as_str(), Language::French);
     let mut svg_res: String = "".to_string();
     for r in res.clone() {
         if r.object_type == DataObjectType::Chart {
