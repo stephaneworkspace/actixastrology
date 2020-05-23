@@ -177,10 +177,10 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
         for r in res {
             if r.object_type != DataObjectType::Chart {
                 if r.object_type == DataObjectType::Aspect {
-                    match params.aspect {
-                        _ => svg_res = "".to_string(),
-                        12 => svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                    }
+                    svg res = match params.aspect {
+                        12 => format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str())),
+                        _ => "".to_string(),
+                    };
                 }
             } else {
                 // to do better inside after for real use
