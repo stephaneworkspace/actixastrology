@@ -213,7 +213,7 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
                             let mut sw_res = false;
                             // Trigone
                             for a in r.aspects {
-                                if a.to_string() == "Trigone".to_string() {
+                                if a.to_string() == "Trine".to_string() {
                                     sw_res = true;
                                 }
                             }
@@ -238,6 +238,66 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
                             // Sextile
                             for a in r.aspects {
                                 if a.to_string() == "Sextile".to_string() {
+                                    sw_res = true;
+                                }
+                            }
+                            if sw_res {
+                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            }
+                        },
+                        7 => {
+                            let mut sw_res = false;
+                            // Minor
+                            for a in r.aspects {
+                                if a.to_string() == "Inconjunction".to_string() || a.to_string() == "Sesquisquare".to_string() || a.to_string() == "Semisquare".to_string() || a.to_string() == "Semisextile".to_string() {
+                                    sw_res = true;
+                                }
+                            }
+                            if sw_res {
+                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            }
+                        },
+                        8 => {
+                            let mut sw_res = false;
+                            // Inconjunction
+                            for a in r.aspects {
+                                if a.to_string() == "Inconjunction".to_string() {
+                                    sw_res = true;
+                                }
+                            }
+                            if sw_res {
+                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            }
+                        },
+                        9 => {
+                            let mut sw_res = false;
+                            // Sesquisquare
+                            for a in r.aspects {
+                                if a.to_string() == "Sesquisquare".to_string() {
+                                    sw_res = true;
+                                }
+                            }
+                            if sw_res {
+                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            }
+                        },
+                        10 => {
+                            let mut sw_res = false;
+                            // Semisquare
+                            for a in r.aspects {
+                                if a.to_string() == "Semisquare".to_string() {
+                                    sw_res = true;
+                                }
+                            }
+                            if sw_res {
+                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            }
+                        },
+                        11 => {
+                            let mut sw_res = false;
+                            // Semisextile
+                            for a in r.aspects {
+                                if a.to_string() == "Semisextile".to_string() {
                                     sw_res = true;
                                 }
                             }
