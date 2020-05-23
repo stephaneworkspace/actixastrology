@@ -179,11 +179,76 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
                 if r.object_type == DataObjectType::Aspect {
                     svg_res = match params.aspect {
                         1 => {
+                            let mut sw_res = false;
                             // Major
                             for a in r.aspects {
-                                println!("{}", a);
+                                if a.to_string() == "Conjunction".to_string() || a.to_string() == "Opposition".to_string() || a.to_string() == "Trine".to_string() || a.to_string() == "Square".to_string() || a.to_string() == "Sextile".to_string() {
+                                    sw_res = true;
+                                }
                             }
-                            "".to_string()
+                            if sw_res {
+format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            } else { "".to_string() }
+                        },
+                        2 => {
+                            let mut sw_res = false;
+                            // Conjunction
+                            for a in r.aspects {
+                                if a.to_string() == "Conjunction".to_string() {
+                                    sw_res = true;
+                                }
+                            }
+                            if sw_res {
+format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            } else { "".to_string() }
+                        },
+                        3 => {
+                            let mut sw_res = false;
+                            // Opposition
+                            for a in r.aspects {
+                                if a.to_string() == "Opposition".to_string() {
+                                    sw_res = true;
+                                }
+                            }
+                            if sw_res {
+format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            } else { "".to_string() }
+                        },
+                        4 => {
+                            let mut sw_res = false;
+                            // Trigone
+                            for a in r.aspects {
+                                if a.to_string() == "Trigone".to_string() {
+                                    sw_res = true;
+                                }
+                            }
+                            if sw_res {
+format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            } else { "".to_string() }
+                        },
+                        5 => {
+                            let mut sw_res = false;
+                            // Square
+                            for a in r.aspects {
+                                if a.to_string() == "Square".to_string() {
+                                    sw_res = true;
+                                }
+                            }
+                            if sw_res {
+format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            } else { "".to_string() }
+                        },
+                        6 => {
+                            let mut sw_res = false;
+                            // Sextile
+                            for a in r.aspects {
+                                if a.to_string() == "Sextile".to_string() {
+                                    sw_res = true;
+                                }
+                            }
+                            if sw_res {
+format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
+                            } else { "".to_string() }
                         },
                         12 => format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str())),
                         _ => "".to_string(),
