@@ -19,7 +19,6 @@ struct AppState {
     month: i32,
     day: i32,
     hour: i32,
-    hourf32: f32,
     min: i32,
 }
 
@@ -43,7 +42,6 @@ async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
         year: data.year,
         month: data.month,
         day: data.day,
-        hourf32: data.hourf32,
         hour: data.hour,
         min: data.min,
         sec: a_data.sec,
@@ -107,7 +105,6 @@ fn app_config(config: &mut web::ServiceConfig) {
                 month: 1,
                 day: 1,
                 hour: 0,
-                hourf32: 0.0,
                 min: 0
             }));
     config.service(
@@ -135,7 +132,6 @@ async fn handle_post_natal_chart(params: web::Form<MyParams>, data: web::Data<Mu
     data.month = params.month;
     data.day = params.day;
     data.hour = params.hour;
-    data.hourf32 = params.hourf32;
     data.min = params.min;
     let svg = "<img src=\"svg/natal.svg\"/>";
     Ok(HttpResponse::Ok()
@@ -158,7 +154,6 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
         year: params.year,
         month: params.month,
         day: params.day,
-        hourf32: 0.0,
         hour: params.hour,
         min: params.min,
         sec: 0.0,
@@ -291,7 +286,6 @@ pub struct MyParams {
     month: i32,
     day: i32,
     hour: i32,
-    hourf32: f32,
     min: i32,
 }
 
