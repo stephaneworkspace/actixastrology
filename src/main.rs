@@ -188,7 +188,7 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
                             }
                             if sw_res {
 format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            } else { "".to_string() }
+                            } else { format!("{}", svg_res)  }
                         },
                         2 => {
                             let mut sw_res = false;
@@ -200,7 +200,7 @@ format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image
                             }
                             if sw_res {
 format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            } else { "".to_string() }
+                            } else { format!("{}", svg_res)  }
                         },
                         3 => {
                             let mut sw_res = false;
@@ -212,7 +212,7 @@ format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image
                             }
                             if sw_res {
 format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            } else { "".to_string() }
+                            } else { format!("{}", svg_res)  }
                         },
                         4 => {
                             let mut sw_res = false;
@@ -224,7 +224,7 @@ format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image
                             }
                             if sw_res {
 format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            } else { "".to_string() }
+                            } else { format!("{}", svg_res)  }
                         },
                         5 => {
                             let mut sw_res = false;
@@ -236,7 +236,7 @@ format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image
                             }
                             if sw_res {
 format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            } else { "".to_string() }
+                            } else { format!("{}", svg_res)  }
                         },
                         6 => {
                             let mut sw_res = false;
@@ -248,10 +248,10 @@ format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image
                             }
                             if sw_res {
 format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            } else { "".to_string() }
+                            } else { format!("{}", svg_res)  }
                         },
                         12 => format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str())),
-                        _ => "".to_string(),
+                        _ => format!("{}", svg_res),
                     };
                  } else {
                     // to do better inside after for real use
