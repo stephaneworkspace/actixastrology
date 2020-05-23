@@ -4,7 +4,7 @@ extern crate serde_derive;
 extern crate serde_json;
 use actix_cors::Cors;
 use actix_web::{middleware, get, web, App, HttpResponse, HttpServer, Responder, Result}; 
-use astrology::svg_draw::{DataChartNatal, DataObjectSvg, DataObjectType};
+use astrology::svg_draw::{DataChartNatal, DataObjectSvg, DataObjectType, DataObjectAspectSvg};
 use libswe_sys::sweconst::Language;
 use base64::encode;
 use serde::{Deserialize, Serialize}; 
@@ -116,7 +116,8 @@ fn app_config(config: &mut web::ServiceConfig) {
             .service(web::resource("/api/").route(web::get().to(index)))
             .service(index3)
             .service(web::resource("/api/natal_chart").route(web::post().to(handle_post_natal_chart)))
-            .service(web::resource("/api/svg_chart").route(web::post().to(handle_post_natal_chart_svg))),
+            .service(web::resource("/api/svg_chart").route(web::post().to(handle_post_natal_chart_svg)))
+            .service(all_aspects),
         );
 }
 
@@ -188,6 +189,18 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
         .content_type("image/svg+xml")
         .body(svg_res))
 }
+
+/// Aspect svg
+#[get("/api/aspects.json")]
+async fn all_aspects(_data: web::Data<Mutex<AppState>>) -> impl Responder {
+    let res: Vec<DataObjectAspectSvg> = astrology::svg_draw::all_aspects(Language::French);
+    let data = serde_json::to_string(&res).unwrap();
+ 
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .body(data)
+}
+
 
 /// Form params
 #[derive(Serialize, Deserialize)]
