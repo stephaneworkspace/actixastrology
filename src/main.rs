@@ -173,6 +173,8 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
             if r.object_type != DataObjectType::Chart {
                 if r.object_type == DataObjectType::Aspect {
                     match params.aspect {
+                        0 => {
+                        },
                         1 => {
                             let mut sw_res = false;
                             // Major
