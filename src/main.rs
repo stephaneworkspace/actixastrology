@@ -323,7 +323,7 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
         .body(svg_res))
 }
 /// Svg only transit
-async fn handle_post_natal_chart_svg_transit(params: web::Form<MyNatalParams>, _data: web::Data<Mutex<AppState>>) -> Result<HttpResponse> {
+async fn handle_post_natal_chart_svg_transit(params: web::Form<MyTransitParams>, _data: web::Data<Mutex<AppState>>) -> Result<HttpResponse> {
     let path_str: String = format!("{}/swisseph-for-astrology-crate/", env::current_dir().unwrap().as_path().display().to_string());
     println!("{}", path_str);
     let d = DataChartNatal {
