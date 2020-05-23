@@ -143,37 +143,26 @@ async fn handle_post_natal_chart(params: web::Form<MyParams>, data: web::Data<Mu
 }
 
 /// Svg only
-async fn handle_post_natal_chart_svg(params: web::Form<MyParams>, data: web::Data<Mutex<AppState>>) -> Result<HttpResponse> {
-    let mut data = data.lock().unwrap();
+async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: web::Data<Mutex<AppState>>) -> Result<HttpResponse> {
+    /*let mut data = data.lock().unwrap();
     data.year = params.year;
     data.month = params.month;
     data.day = params.day;
     data.hour = params.hour;
     data.min = params.min;
-
-    // Copy past index3
-    const PATH: &str = "data.json";
-    let mut s = String::new();
-    let mut file_path = PathBuf::new();
-    file_path.push(env::current_dir().unwrap().as_path());
-    file_path.push(PATH);
-    File::open(file_path.as_path())
-        .unwrap()
-        .read_to_string(&mut s)
-        .unwrap();
-    let a_data: DataChartNatal= serde_json::from_str(&s).unwrap();
+    */
     let path_str: String = format!("{}/swisseph-for-astrology-crate/", env::current_dir().unwrap().as_path().display().to_string());
     println!("{}", path_str);
     let d = DataChartNatal {
-        year: data.year,
-        month: data.month,
-        day: data.day,
+        year: params.year,
+        month: params.month,
+        day: params.day,
         hourf32: 0.0,
-        hour: data.hour,
-        min: data.min,
-        sec: a_data.sec,
-        lat: a_data.lat,
-        lng: a_data.lng,
+        hour: params.hour,
+        min: params.min,
+        sec: 0.0,
+        lat: params.lat,
+        lng: params.lng,
     };
     let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(600.0, d, path_str.as_str(), Language::French);
     let mut svg_res: String = "".to_string();
@@ -209,4 +198,16 @@ pub struct MyParams {
     hour: i32,
     hourf32: f32,
     min: i32,
+}
+
+/// NewForm for js/ts front
+#[derive(Serialize, Deserialize)]
+pub struct MyNatalParams {
+    year: i32,
+    month: i32,
+    day: i32,
+    hour: i32,
+    min: i32,
+    lat: f32,
+    lng: f32
 }
