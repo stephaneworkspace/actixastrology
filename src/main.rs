@@ -2,6 +2,7 @@ extern crate base64;
 extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
+extern crate filter_city;
 use actix_cors::Cors;
 use actix_web::{middleware, get, web, App, HttpResponse, HttpServer, Responder, Result}; 
 use astrology::svg_draw::{DataChartNatal, DataObjectSvg, DataObjectType, DataObjectAspectSvg};
@@ -115,7 +116,8 @@ fn app_config(config: &mut web::ServiceConfig) {
             .service(web::resource("/api/natal_chart").route(web::post().to(handle_post_natal_chart)))
             .service(web::resource("/api/svg_chart").route(web::post().to(handle_post_natal_chart_svg)))
             .service(web::resource("/api/svg_chart_transit").route(web::post().to(handle_post_natal_chart_svg_transit)))
-            .service(all_aspects),
+            .service(all_aspects)
+            .service(web::resource("/api/filter-city").route(web::post().to(handle_post_filter_city))),
         );
 }
 
@@ -124,6 +126,16 @@ async fn index() -> Result<HttpResponse> {
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(include_str!("../static/form.html")))
+}
+
+/// Handle filter-city
+async fn handle_post_filter_city(params: web::Form<MyParamsFilterCity>, _data: web::Data<Mutex<AppState>>) -> Result<HttpResponse> {
+    let search : Vec<filter_city::City> = filter_city::filter_city(params.name.as_str());
+    let data = serde_json::to_string(&search).unwrap();
+ 
+    Ok(HttpResponse::Ok()
+        .content_type("application/json")
+        .body(data))
 }
 
 /// Handle form
@@ -318,7 +330,7 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
     }
     svg_res = format!("{}</svg>", svg_res);
  
-     Ok(HttpResponse::Ok()
+    Ok(HttpResponse::Ok()
         .content_type("image/svg+xml")
         .body(svg_res))
 }
@@ -526,7 +538,6 @@ async fn all_aspects(_data: web::Data<Mutex<AppState>>) -> impl Responder {
         .body(data)
 }
 
-
 /// Form params
 #[derive(Serialize, Deserialize)]
 pub struct MyParams {
@@ -536,6 +547,7 @@ pub struct MyParams {
     hour: i32,
     min: i32,
 }
+
 
 /// NewForm for js/ts front
 #[derive(Serialize, Deserialize)]
@@ -549,6 +561,7 @@ pub struct MyNatalParams {
     lng: f32,
     aspect: i32,
 }
+
 /// NewForm for js/ts front
 #[derive(Serialize, Deserialize)]
 pub struct MyTransitParams {
@@ -568,3 +581,10 @@ pub struct MyTransitParams {
     lng_t: f32,
     aspect: i32,
 }
+
+/// Filter city
+#[derive(Serialize, Deserialize)]
+pub struct MyParamsFilterCity {
+    name: String
+}
+

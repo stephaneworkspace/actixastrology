@@ -16,3 +16,4 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.41"
 serde_derive = "1.0.102"
 base64 = "0.11.0"
+filter-city = { git= "https://github.com/stephaneworkspace/filter-city/" }
