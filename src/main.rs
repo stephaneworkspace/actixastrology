@@ -117,7 +117,7 @@ fn app_config(config: &mut web::ServiceConfig) {
             .service(web::resource("/api/svg_chart").route(web::post().to(handle_post_natal_chart_svg)))
             .service(web::resource("/api/svg_chart_transit").route(web::post().to(handle_post_natal_chart_svg_transit)))
             .service(all_aspects)
-            .service(web::resource("/api/filter-city").route(web::post().to(handle_post_filter_city))),
+            .service(web::resource("/api/filter-city/{name}").route(web::get().to(handle_post_filter_city))),
         );
 }
 
@@ -129,8 +129,8 @@ async fn index() -> Result<HttpResponse> {
 }
 
 /// Handle filter-city
-async fn handle_post_filter_city(params: web::Form<MyParamsFilterCity>, _data: web::Data<Mutex<AppState>>) -> Result<HttpResponse> {
-    let search : Vec<filter_city::City> = filter_city::filter_city(params.name.as_str());
+async fn handle_post_filter_city(obj: web::Path<MyParamsFilterCity>) -> Result<HttpResponse> {
+    let search : Vec<filter_city::City> = filter_city::filter_city(obj.name.as_str());
     let data = serde_json::to_string(&search).unwrap();
  
     Ok(HttpResponse::Ok()
