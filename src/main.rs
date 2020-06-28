@@ -157,14 +157,14 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
     let path_str: String = format!("{}/swisseph-for-astrology-crate/", env::current_dir().unwrap().as_path().display().to_string());
     println!("{}", path_str);
     let d = DataChartNatal {
-        year: params.year,
-        month: params.month,
-        day: params.day,
-        hour: params.hour,
-        min: params.min,
+        year: data.year,
+        month: data.month,
+        day: data.day,
+        hour: data.hour,
+        min: data.min,
         sec: 0.0,
-        lat: params.lat,
-        lng: params.lng,
+        lat: data.lat,
+        lng: data.lng,
     };
     let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(1000.0, d, path_str.as_str(), Language::French);
     let mut svg_res: String = "".to_string();
