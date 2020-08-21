@@ -125,6 +125,7 @@ fn app_config(config: &mut web::ServiceConfig) {
             .service(all_aspects)
             .service(web::resource("/api/filter-city/{name}").route(web::get().to(handle_post_filter_city)))
             .service(web::resource("/api/filter-city-2/{name}").route(web::get().to(handle_post_filter_city_2))),
+            .service(web::resource("/api/filter-city-time-zone").route(web::get().to(handle_post_filter_city_time_zone))),
         );
 }
 
@@ -145,7 +146,7 @@ async fn handle_post_filter_city(obj: web::Path<MyParamsFilterCity>) -> Result<H
         .body(data))
 }
 
-/// Handle filter-city with sqlite
+/// Handle filter-city with sqlite for query a city
 async fn handle_post_filter_city_2(obj: web::Path<MyParamsFilterCity>) -> Result<HttpResponse> {
     let status = Repo::connect();
     let repo = match status {
@@ -155,6 +156,30 @@ async fn handle_post_filter_city_2(obj: web::Path<MyParamsFilterCity>) -> Result
         }
     };
     let status = repo.d01_search_compact(obj.name.as_str());
+    let recs = match status {
+        Ok(res) => res,
+        Err(AppError { err_type, message }) => {
+            panic!("{:?} {}", err_type, message)
+        }
+    };
+   
+    let data = serde_json::to_string(&recs).unwrap();
+ 
+    Ok(HttpResponse::Ok()
+        .content_type("application/json")
+        .body(data))
+}
+
+/// Handle filter-city with sqlite for timezone find all
+async fn handle_post_filter_city_time_zone(obj: web::Path<MyParamsFilterCity>) -> Result<HttpResponse> {
+    let status = Repo::connect();
+    let repo = match status {
+        Ok(res) => res,
+        Err(AppError { err_type, message }) => {
+            panic!("{:?} {}", err_type, message)
+        }
+    };
+    let status = repo.d03_find_all_compact_all();
     let recs = match status {
         Ok(res) => res,
         Err(AppError { err_type, message }) => {
