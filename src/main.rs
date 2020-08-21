@@ -3,6 +3,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 extern crate filter_city;
+extern crate city_time_zone_sqlite;
 use actix_cors::Cors;
 use actix_web::{middleware, get, web, App, HttpResponse, HttpServer, Responder, Result}; 
 use astrology::svg_draw::{DataChartNatal, DataObjectSvg, DataObjectType, DataObjectAspectSvg};
@@ -14,6 +15,8 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 use std::sync::Mutex;
+use city_time_zone_sqlite::{Repo, TraitRepoUtils, TraitRepoD01, AppError};
+// use city_time_zone_sqlite::dto::DtoCitys;
 
 pub struct AppState {
     year: i32,
@@ -120,7 +123,8 @@ fn app_config(config: &mut web::ServiceConfig) {
             .service(web::resource("/api/svg_chart").route(web::post().to(handle_post_natal_chart_svg)))
             .service(web::resource("/api/svg_chart_transit").route(web::post().to(handle_post_natal_chart_svg_transit)))
             .service(all_aspects)
-            .service(web::resource("/api/filter-city/{name}").route(web::get().to(handle_post_filter_city))),
+            .service(web::resource("/api/filter-city/{name}").route(web::get().to(handle_post_filter_city)))
+            .service(web::resource("/api/filter-city-2/{name}").route(web::get().to(handle_post_filter_city_2))),
         );
 }
 
@@ -135,6 +139,30 @@ async fn index() -> Result<HttpResponse> {
 async fn handle_post_filter_city(obj: web::Path<MyParamsFilterCity>) -> Result<HttpResponse> {
     let search : Vec<filter_city::City> = filter_city::filter_city(obj.name.as_str());
     let data = serde_json::to_string(&search).unwrap();
+ 
+    Ok(HttpResponse::Ok()
+        .content_type("application/json")
+        .body(data))
+}
+
+/// Handle filter-city with sqlite
+async fn handle_post_filter_city_2(obj: web::Path<MyParamsFilterCity>) -> Result<HttpResponse> {
+    let status = Repo::connect();
+    let repo = match status {
+        Ok(res) => res,
+        Err(AppError { err_type, message }) => {
+            panic!("{:?} {}", err_type, message)
+        }
+    };
+    let status = repo.d01_search(obj.name.as_str());
+    let recs = match status {
+        Ok(res) => res,
+        Err(AppError { err_type, message }) => {
+            panic!("{:?} {}", err_type, message)
+        }
+    };
+   
+    let data = serde_json::to_string(&recs).unwrap();
  
     Ok(HttpResponse::Ok()
         .content_type("application/json")
