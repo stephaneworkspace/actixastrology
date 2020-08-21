@@ -15,7 +15,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 use std::sync::Mutex;
-use city_time_zone_sqlite::{Repo, TraitRepoUtils, TraitRepoD01, AppError};
+use city_time_zone_sqlite::{Repo, TraitRepoUtils, TraitRepoD01, TraitRepoD03, AppError};
 // use city_time_zone_sqlite::dto::DtoCitys;
 
 pub struct AppState {
@@ -171,7 +171,7 @@ async fn handle_post_filter_city_2(obj: web::Path<MyParamsFilterCity>) -> Result
 }
 
 /// Handle filter-city with sqlite for timezone find all
-async fn handle_post_filter_city_time_zone(obj: web::Path<MyParamsFilterCity>) -> Result<HttpResponse> {
+async fn handle_post_filter_city_time_zone() -> Result<HttpResponse> {
     let status = Repo::connect();
     let repo = match status {
         Ok(res) => res,
