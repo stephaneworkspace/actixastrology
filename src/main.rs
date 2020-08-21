@@ -15,15 +15,16 @@ use std::io::Read;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
-struct AppState {
+pub struct AppState {
     year: i32,
-    month: i32,
-    day: i32,
-    hour: i32,
-    min: i32,
+    month: u32,
+    day: u32,
+    hour: u32,
+    min: u32,
+    time_zone: f32,
 }
 
-/// Natal svg
+/// Generate natal svg
 #[get("/api/svg/natal.svg")]
 async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
     let data = data.lock().unwrap();
@@ -46,6 +47,7 @@ async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
         hour: data.hour,
         min: data.min,
         sec: a_data.sec,
+        time_zone: data.time_zone,
         lat: a_data.lat,
         lng: a_data.lng,
     };
@@ -93,8 +95,8 @@ async fn main() -> std::io::Result<()> {
             //.route("/", web::get().to(index))
             //.route("/again", web::get().to(index2))
     })
-    .bind("92.222.64.94:8088")?
-    //.bind("0.0.0.0:8088")?
+    //.bind("92.222.64.94:8088")?
+    .bind("0.0.0.0:8088")?
     .run()
     .await
 }
@@ -106,7 +108,8 @@ fn app_config(config: &mut web::ServiceConfig) {
                 month: 1,
                 day: 1,
                 hour: 0,
-                min: 0
+                min: 0,
+                time_zone: 2.0,
             }));
     config.service(
         web::scope("")
@@ -146,6 +149,7 @@ async fn handle_post_natal_chart(params: web::Form<MyParams>, data: web::Data<Mu
     data.day = params.day;
     data.hour = params.hour;
     data.min = params.min;
+    data.time_zone = params.time_zone;
     let svg = "<img src=\"svg/natal.svg\"/>";
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
@@ -163,10 +167,11 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
         hour: params.hour,
         min: params.min,
         sec: 0.0,
+        time_zone: params.time_zone,
         lat: params.lat,
         lng: params.lng,
     };
-    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(1000.0, d, path_str.as_str(), Language::French);
+    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(1000.0 as f32, d, path_str.as_str(), Language::French);
     let mut svg_res: String = "".to_string();
     for r in res.clone() {
         if r.object_type == DataObjectType::Chart {
@@ -345,6 +350,7 @@ async fn handle_post_natal_chart_svg_transit(params: web::Form<MyTransitParams>,
         hour: params.hour,
         min: params.min,
         sec: 0.0,
+        time_zone: params.time_zone,
         lat: params.lat,
         lng: params.lng,
     };
@@ -355,6 +361,7 @@ async fn handle_post_natal_chart_svg_transit(params: web::Form<MyTransitParams>,
         hour: params.hour_t,
         min: params.min_t,
         sec: 0.0,
+        time_zone: params.time_zone_t,
         lat: params.lat_t,
         lng: params.lng_t,
     };
@@ -542,10 +549,11 @@ async fn all_aspects(_data: web::Data<Mutex<AppState>>) -> impl Responder {
 #[derive(Serialize, Deserialize)]
 pub struct MyParams {
     year: i32,
-    month: i32,
-    day: i32,
-    hour: i32,
-    min: i32,
+    month: u32,
+    day: u32,
+    hour: u32,
+    min: u32,
+    time_zone: f32,
 }
 
 
@@ -553,10 +561,11 @@ pub struct MyParams {
 #[derive(Serialize, Deserialize)]
 pub struct MyNatalParams {
     year: i32,
-    month: i32,
-    day: i32,
-    hour: i32,
-    min: i32,
+    month: u32,
+    day: u32,
+    hour: u32,
+    min: u32,
+    time_zone: f32,
     lat: f32,
     lng: f32,
     aspect: i32,
@@ -566,17 +575,19 @@ pub struct MyNatalParams {
 #[derive(Serialize, Deserialize)]
 pub struct MyTransitParams {
     year: i32,
-    month: i32,
-    day: i32,
-    hour: i32,
-    min: i32,
+    month: u32,
+    day: u32,
+    hour: u32,
+    min: u32,
+    time_zone: f32,
     lat: f32,
     lng: f32,
     year_t: i32,
-    month_t: i32,
-    day_t: i32,
-    hour_t: i32,
-    min_t: i32,
+    month_t: u32,
+    day_t: u32,
+    hour_t: u32,
+    min_t: u32,
+    time_zone_t: f32,
     lat_t: f32,
     lng_t: f32,
     aspect: i32,
@@ -587,4 +598,3 @@ pub struct MyTransitParams {
 pub struct MyParamsFilterCity {
     name: String
 }
-
