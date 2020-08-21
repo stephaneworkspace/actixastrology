@@ -124,7 +124,7 @@ fn app_config(config: &mut web::ServiceConfig) {
             .service(web::resource("/api/svg_chart_transit").route(web::post().to(handle_post_natal_chart_svg_transit)))
             .service(all_aspects)
             .service(web::resource("/api/filter-city/{name}").route(web::get().to(handle_post_filter_city)))
-            .service(web::resource("/api/filter-city-2/{name}").route(web::get().to(handle_post_filter_city_2))),
+            .service(web::resource("/api/filter-city-2/{name}").route(web::get().to(handle_post_filter_city_2)))
             .service(web::resource("/api/filter-city-time-zone").route(web::get().to(handle_post_filter_city_time_zone))),
         );
 }
@@ -179,7 +179,7 @@ async fn handle_post_filter_city_time_zone(obj: web::Path<MyParamsFilterCity>) -
             panic!("{:?} {}", err_type, message)
         }
     };
-    let status = repo.d03_find_all_compact_all();
+    let status = repo.d03_find_all_compact();
     let recs = match status {
         Ok(res) => res,
         Err(AppError { err_type, message }) => {
