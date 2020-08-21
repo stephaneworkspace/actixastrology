@@ -154,7 +154,7 @@ async fn handle_post_filter_city_2(obj: web::Path<MyParamsFilterCity>) -> Result
             panic!("{:?} {}", err_type, message)
         }
     };
-    let status = repo.d01_search(obj.name.as_str());
+    let status = repo.d01_search_compact(obj.name.as_str());
     let recs = match status {
         Ok(res) => res,
         Err(AppError { err_type, message }) => {
