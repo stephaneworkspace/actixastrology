@@ -3,3 +3,4 @@
 data.json
 Cargo.lock
 /.vscode
+./city_time_zone.db
