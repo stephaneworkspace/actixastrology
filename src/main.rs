@@ -1,9 +1,6 @@
-extern crate htmlescape;
-extern crate base64;
 extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
-extern crate filter_city;
 extern crate city_time_zone_sqlite;
 use actix_cors::Cors;
 use actix_web::{middleware, get, web, App, HttpResponse, HttpServer, Responder, Result}; 
@@ -27,37 +24,58 @@ pub struct AppState {
     time_zone: f32,
 }
 
-/// Generate natal svg
-#[get("/api/svg/natal.svg")]
-async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
-    let data = data.lock().unwrap();
-    const PATH: &str = "data.json";
-    let mut s = String::new();
-    let mut file_path = PathBuf::new();
-    file_path.push(env::current_dir().unwrap().as_path());
-    file_path.push(PATH);
-    File::open(file_path.as_path())
-        .unwrap()
-        .read_to_string(&mut s)
-        .unwrap();
-    let a_data: DataChartNatal= serde_json::from_str(&s).unwrap();
-    let path_str: String = format!("{}/swisseph-for-astrology-crate/", env::current_dir().unwrap().as_path().display().to_string());
-    println!("{}", path_str);
-    let d = DataChartNatal {
-        year: data.year,
-        month: data.month,
-        day: data.day,
-        hour: data.hour,
-        min: data.min,
-        sec: a_data.sec,
-        time_zone: data.time_zone,
-        lat: a_data.lat,
-        lng: a_data.lng,
-    };
-    let svg_res = astrology::svg_draw::chart_svg(1000.0 as f32, d, path_str.as_str(), Language::French, AspectsFilter::AllAspects);
-    HttpResponse::Ok()
-        .content_type("image/svg+xml")
-        .body(svg_res)
+/// Form params
+#[derive(Serialize, Deserialize)]
+pub struct MyParams {
+    year: i32,
+    month: u32,
+    day: u32,
+    hour: u32,
+    min: u32,
+    time_zone: f32,
+}
+
+
+/// NewForm for js/ts front
+#[derive(Serialize, Deserialize)]
+pub struct MyNatalParams {
+    year: i32,
+    month: u32,
+    day: u32,
+    hour: u32,
+    min: u32,
+    time_zone: f32,
+    lat: f32,
+    lng: f32,
+    aspect: i32,
+}
+
+/// NewForm for js/ts front
+#[derive(Serialize, Deserialize)]
+pub struct MyTransitParams {
+    year: i32,
+    month: u32,
+    day: u32,
+    hour: u32,
+    min: u32,
+    time_zone: f32,
+    lat: f32,
+    lng: f32,
+    year_t: i32,
+    month_t: u32,
+    day_t: u32,
+    hour_t: u32,
+    min_t: u32,
+    time_zone_t: f32,
+    lat_t: f32,
+    lng_t: f32,
+    aspect: i32,
+}
+
+/// Filter city
+#[derive(Serialize, Deserialize)]
+pub struct MyParamsFilterCity {
+    name: String
 }
 
 /// Main
@@ -105,7 +123,6 @@ fn app_config(config: &mut web::ServiceConfig) {
             .service(web::resource("/api/svg_chart_transit").route(web::post().to(handle_post_natal_chart_svg_transit)))
             .service(all_aspects)
             .service(web::resource("/api/filter-city/{name}").route(web::get().to(handle_post_filter_city)))
-            .service(web::resource("/api/filter-city-2/{name}").route(web::get().to(handle_post_filter_city_2)))
             .service(web::resource("/api/filter-city-time-zone").route(web::get().to(handle_post_filter_city_time_zone))),
         );
 }
@@ -117,18 +134,8 @@ async fn index() -> Result<HttpResponse> {
         .body(include_str!("../static/form.html")))
 }
 
-/// Handle filter-city
-async fn handle_post_filter_city(obj: web::Path<MyParamsFilterCity>) -> Result<HttpResponse> {
-    let search : Vec<filter_city::City> = filter_city::filter_city(obj.name.as_str());
-    let data = serde_json::to_string(&search).unwrap();
- 
-    Ok(HttpResponse::Ok()
-        .content_type("application/json")
-        .body(data))
-}
-
 /// Handle filter-city with sqlite for query a city
-async fn handle_post_filter_city_2(obj: web::Path<MyParamsFilterCity>) -> Result<HttpResponse> {
+async fn handle_post_filter_city(obj: web::Path<MyParamsFilterCity>) -> Result<HttpResponse> {
     let status = Repo::connect();
     let repo = match status {
         Ok(res) => res,
@@ -262,56 +269,35 @@ async fn all_aspects(_data: web::Data<Mutex<AppState>>) -> impl Responder {
         .body(data)
 }
 
-/// Form params
-#[derive(Serialize, Deserialize)]
-pub struct MyParams {
-    year: i32,
-    month: u32,
-    day: u32,
-    hour: u32,
-    min: u32,
-    time_zone: f32,
-}
-
-
-/// NewForm for js/ts front
-#[derive(Serialize, Deserialize)]
-pub struct MyNatalParams {
-    year: i32,
-    month: u32,
-    day: u32,
-    hour: u32,
-    min: u32,
-    time_zone: f32,
-    lat: f32,
-    lng: f32,
-    aspect: i32,
-}
-
-/// NewForm for js/ts front
-#[derive(Serialize, Deserialize)]
-pub struct MyTransitParams {
-    year: i32,
-    month: u32,
-    day: u32,
-    hour: u32,
-    min: u32,
-    time_zone: f32,
-    lat: f32,
-    lng: f32,
-    year_t: i32,
-    month_t: u32,
-    day_t: u32,
-    hour_t: u32,
-    min_t: u32,
-    time_zone_t: f32,
-    lat_t: f32,
-    lng_t: f32,
-    aspect: i32,
-}
-
-/// Filter city
-#[derive(Serialize, Deserialize)]
-pub struct MyParamsFilterCity {
-    name: String
+/// Generate natal svg
+#[get("/api/svg/natal.svg")]
+async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
+    let data = data.lock().unwrap();
+    const PATH: &str = "data.json";
+    let mut s = String::new();
+    let mut file_path = PathBuf::new();
+    file_path.push(env::current_dir().unwrap().as_path());
+    file_path.push(PATH);
+    File::open(file_path.as_path())
+        .unwrap()
+        .read_to_string(&mut s)
+        .unwrap();
+    let a_data: DataChartNatal= serde_json::from_str(&s).unwrap();
+    let path_str: String = format!("{}/swisseph-for-astrology-crate/", env::current_dir().unwrap().as_path().display().to_string());
+    println!("{}", path_str);
+    let d = DataChartNatal {
+        year: data.year,
+        month: data.month,
+        day: data.day,
+        hour: data.hour,
+        min: data.min,
+        sec: a_data.sec,
+        time_zone: data.time_zone,
+        lat: a_data.lat,
+        lng: a_data.lng,
+    };
+    let svg_res = astrology::svg_draw::chart_svg(1000.0 as f32, d, path_str.as_str(), Language::French, AspectsFilter::AllAspects);
+    HttpResponse::Ok()
+        .content_type("image/svg+xml")
+        .body(svg_res)
 }
