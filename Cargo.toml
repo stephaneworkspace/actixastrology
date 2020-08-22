@@ -1,7 +1,7 @@
 [package]
 name = "actixastrology"
 version = "0.1.0"
-authors = ["stephaneworkspace <s.bressani@bluewin.ch>"]
+authors = ["stephaneworkspace <stephane@astrologie-traditionnelle.net>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -10,8 +10,8 @@ edition = "2018"
 actix-cors = "0.2"
 actix-web = "2.0"
 actix-rt = "1.0"
-astrology = "0.2.2"
-libswe-sys = "0.1"
+astrology = "0.2.3"
+libswe-sys = "0.2.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.41"
 serde_derive = "1.0.102"
@@ -19,3 +19,5 @@ base64 = "0.11.0"
 filter-city = { git = "https://github.com/stephaneworkspace/filter-city/" }
 city_time_zone_sqlite = { git = "https://github.com/stephaneworkspace/city_time_zone_sqlite/" }
 htmlescape = "0.3.1"
+num-traits = "0.2"
+num-derive = "0.2"

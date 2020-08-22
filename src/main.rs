@@ -7,9 +7,8 @@ extern crate filter_city;
 extern crate city_time_zone_sqlite;
 use actix_cors::Cors;
 use actix_web::{middleware, get, web, App, HttpResponse, HttpServer, Responder, Result}; 
-use astrology::svg_draw::{DataChartNatal, DataObjectSvg, DataObjectType, DataObjectAspectSvg};
-use libswe_sys::sweconst::Language;
-use base64::encode;
+use astrology::svg_draw::{DataChartNatal, DataObjectAspectSvg};
+use libswe_sys::sweconst::{Language, AspectsFilter};
 use serde::{Deserialize, Serialize}; 
 use std::env;
 use std::fs::File;
@@ -17,7 +16,7 @@ use std::io::Read;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use city_time_zone_sqlite::{Repo, TraitRepoUtils, TraitRepoD01, TraitRepoD03, AppError};
-// use city_time_zone_sqlite::dto::DtoCitys;
+use num_traits::FromPrimitive;
 
 pub struct AppState {
     year: i32,
@@ -55,26 +54,7 @@ async fn index3(data: web::Data<Mutex<AppState>>) -> impl Responder {
         lat: a_data.lat,
         lng: a_data.lng,
     };
-    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(1000.0, d, path_str.as_str(), Language::French);
-    let mut svg_res: String = "".to_string();
-    for r in res.clone() {
-        if r.object_type == DataObjectType::Chart {
-            svg_res = r.svg;
-        }
-    }
-    if svg_res != "" {
-        svg_res = svg_res.replace("</svg>", "");
-        for r in res {
-            if r.object_type != DataObjectType::Chart {
-                // to do better inside after for real use
-                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()));
-            }
-        }
-    } else {
-        svg_res = "<svg>".to_string();
-    }
-    svg_res = format!("{}</svg>", svg_res);
- 
+    let svg_res = astrology::svg_draw::chart_svg(1000.0 as f32, d, path_str.as_str(), Language::French, AspectsFilter::AllAspects);
     HttpResponse::Ok()
         .content_type("image/svg+xml")
         .body(svg_res)
@@ -226,170 +206,11 @@ async fn handle_post_natal_chart_svg(params: web::Form<MyNatalParams>, _data: we
         lat: params.lat,
         lng: params.lng,
     };
-    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart(1000.0 as f32, d, path_str.as_str(), Language::French);
-    let mut svg_res: String = "".to_string();
-    for r in res.clone() {
-        if r.object_type == DataObjectType::Chart {
-            svg_res = r.svg;
-        }
-    }
-    if svg_res != "" {
-        svg_res = svg_res.replace("</svg>", "");
-        for r in res {
-            if r.object_type != DataObjectType::Chart {
-                if r.object_type == DataObjectType::Aspect {
-                    match params.aspect {
-                        0 => {
-                        },
-                        1 => {
-                            let mut sw_res = false;
-                            // Major
-                            for a in r.aspects {
-                                if a.to_string() == "Conjunction".to_string() || a.to_string() == "Opposition".to_string() || a.to_string() == "Trine".to_string() || a.to_string() == "Square".to_string() || a.to_string() == "Sextile".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        2 => {
-                            let mut sw_res = false;
-                            // Conjunction
-                            for a in r.aspects {
-                                if a.to_string() == "Conjunction".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        3 => {
-                            let mut sw_res = false;
-                            // Opposition
-                            for a in r.aspects {
-                                if a.to_string() == "Opposition".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        4 => {
-                            let mut sw_res = false;
-                            // Trigone
-                            for a in r.aspects {
-                                if a.to_string() == "Trine".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        5 => {
-                            let mut sw_res = false;
-                            // Square
-                            for a in r.aspects {
-                                if a.to_string() == "Square".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        6 => {
-                            let mut sw_res = false;
-                            // Sextile
-                            for a in r.aspects {
-                                if a.to_string() == "Sextile".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        7 => {
-                            let mut sw_res = false;
-                            // Minor
-                            for a in r.aspects {
-                                if a.to_string() == "Inconjunction".to_string() || a.to_string() == "Sesquisquare".to_string() || a.to_string() == "Semisquare".to_string() || a.to_string() == "Semisextile".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        8 => {
-                            let mut sw_res = false;
-                            // Inconjunction
-                            for a in r.aspects {
-                                if a.to_string() == "Inconjunction".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        9 => {
-                            let mut sw_res = false;
-                            // Sesquisquare
-                            for a in r.aspects {
-                                if a.to_string() == "Sesquisquare".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        10 => {
-                            let mut sw_res = false;
-                            // Semisquare
-                            for a in r.aspects {
-                                if a.to_string() == "Semisquare".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        11 => {
-                            let mut sw_res = false;
-                            // Semisextile
-                            for a in r.aspects {
-                                if a.to_string() == "Semisextile".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        12 => svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str())),
-                        _ => svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str())),
-                    }
-                 } else {
-                    // to do better inside after for real use
-                    svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()));
-                }
-            } else {
-                // to do better inside after for real use
-                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()));
-            }
-        }
-    } else {
-        svg_res = "<svg>".to_string();
-    }
-    svg_res = format!("{}</svg>", svg_res);
- 
+    let aspect: AspectsFilter = match FromPrimitive::from_i32(params.aspect) {
+        Some(a) => a,
+        None => AspectsFilter::NoAspects,
+    };
+    let svg_res = astrology::svg_draw::chart_svg(1000.0 as f32, d, path_str.as_str(), Language::French, aspect);
     Ok(HttpResponse::Ok()
         .content_type("image/svg+xml")
         .body(svg_res))
@@ -420,171 +241,12 @@ async fn handle_post_natal_chart_svg_transit(params: web::Form<MyTransitParams>,
         lat: params.lat_t,
         lng: params.lng_t,
     };
-    let res: Vec<DataObjectSvg> = astrology::svg_draw::chart_with_transit(1000.0, d, d_t, path_str.as_str(), Language::French);
-    let mut svg_res: String = "".to_string();
-    for r in res.clone() {
-        if r.object_type == DataObjectType::Chart {
-            svg_res = r.svg;
-        }
-    }
-    if svg_res != "" {
-        svg_res = svg_res.replace("</svg>", "");
-        for r in res {
-            if r.object_type != DataObjectType::Chart {
-                if r.object_type == DataObjectType::Aspect {
-                    match params.aspect {
-                        0 => {
-                        },
-                        1 => {
-                            let mut sw_res = false;
-                            // Major
-                            for a in r.aspects {
-                                if a.to_string() == "Conjunction".to_string() || a.to_string() == "Opposition".to_string() || a.to_string() == "Trine".to_string() || a.to_string() == "Square".to_string() || a.to_string() == "Sextile".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        2 => {
-                            let mut sw_res = false;
-                            // Conjunction
-                            for a in r.aspects {
-                                if a.to_string() == "Conjunction".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        3 => {
-                            let mut sw_res = false;
-                            // Opposition
-                            for a in r.aspects {
-                                if a.to_string() == "Opposition".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        4 => {
-                            let mut sw_res = false;
-                            // Trigone
-                            for a in r.aspects {
-                                if a.to_string() == "Trine".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        5 => {
-                            let mut sw_res = false;
-                            // Square
-                            for a in r.aspects {
-                                if a.to_string() == "Square".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        6 => {
-                            let mut sw_res = false;
-                            // Sextile
-                            for a in r.aspects {
-                                if a.to_string() == "Sextile".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        7 => {
-                            let mut sw_res = false;
-                            // Minor
-                            for a in r.aspects {
-                                if a.to_string() == "Inconjunction".to_string() || a.to_string() == "Sesquisquare".to_string() || a.to_string() == "Semisquare".to_string() || a.to_string() == "Semisextile".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        8 => {
-                            let mut sw_res = false;
-                            // Inconjunction
-                            for a in r.aspects {
-                                if a.to_string() == "Inconjunction".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        9 => {
-                            let mut sw_res = false;
-                            // Sesquisquare
-                            for a in r.aspects {
-                                if a.to_string() == "Sesquisquare".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        10 => {
-                            let mut sw_res = false;
-                            // Semisquare
-                            for a in r.aspects {
-                                if a.to_string() == "Semisquare".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        11 => {
-                            let mut sw_res = false;
-                            // Semisextile
-                            for a in r.aspects {
-                                if a.to_string() == "Semisextile".to_string() {
-                                    sw_res = true;
-                                }
-                            }
-                            if sw_res {
-                                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()))
-                            }
-                        },
-                        12 => svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str())),
-                        _ => svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str())),
-                    }
-                 } else {
-                    // to do better inside after for real use
-                    svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()));
-                }
-            } else {
-                // to do better inside after for real use
-                svg_res = format!("{}<image width=\"{}\" height=\"{}\" x=\"{}\" y=\"{}\" href=\"data:image/svg+xml;base64,{}\"/>", svg_res, r.size_x, r.size_y, r.pos_x, r.pos_y, encode(r.svg.as_str()));
-            }
-        }
-    } else {
-        svg_res = "<svg>".to_string();
-    }
-    svg_res = format!("{}</svg>", svg_res);
- 
-     Ok(HttpResponse::Ok()
+    let aspect: AspectsFilter = match FromPrimitive::from_i32(params.aspect) {
+        Some(a) => a,
+        None => AspectsFilter::NoAspects,
+    };
+    let svg_res = astrology::svg_draw::chart_svg_with_transit(1000.0, d, d_t, path_str.as_str(), Language::French, aspect);
+    Ok(HttpResponse::Ok()
         .content_type("image/svg+xml")
         .body(svg_res))
 }
