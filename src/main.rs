@@ -168,7 +168,7 @@ async fn handle_post_filter_city_time_zone() -> Result<HttpResponse> {
             panic!("{:?} {}", err_type, message)
         }
     };
-    let status = repo.d03_find_all_compact();
+    let status = repo.d03_find_all();
     let recs = match status {
         Ok(res) => res,
         Err(AppError { err_type, message }) => {
