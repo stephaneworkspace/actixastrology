@@ -88,9 +88,10 @@ async fn main() -> std::io::Result<()> {
     // Server
     HttpServer::new(|| {
         App::new()
-            .wrap(
+            /*.wrap(
                 // Cors::new().support_credentials().finish()) Interessant
                 Cors::new().finish())
+            */
             .wrap(middleware::Logger::default())
             .configure(app_config)
             //.service(index3)
