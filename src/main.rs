@@ -17,7 +17,6 @@ use std::io::Read;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use city_time_zone_sqlite::{Repo, TraitRepoUtils, TraitRepoD01, TraitRepoD03, AppError};
-use htmlescape::{decode_html, DecodeErr}; 
 // use city_time_zone_sqlite::dto::DtoCitys;
 
 pub struct AppState {
@@ -157,21 +156,8 @@ async fn handle_post_filter_city_2(obj: web::Path<MyParamsFilterCity>) -> Result
             panic!("{:?} {}", err_type, message)
         }
     };
-    // TODO Test if actix crash, install watch (search on internet)
-    let decoded_status: Result<String, DecodeErr> = match decode_html(&obj.name.as_str()) {
-        Err(err) => {
-            println!("HTML DECODE Error {:?} at character {}", err.kind, err.position);
-            Err(err)
-        }
-        Ok(res) => {
-            Ok(res)
-        }
-    };
-    let parse = match decoded_status {
-        Ok(res) => res,
-        _ => obj.name.clone()
-    };
-    let status = repo.d01_search_compact(parse.as_str());
+    println!("{}",&obj.name.as_str()); 
+    let status = repo.d01_search_compact(&obj.name.as_str());
     let recs = match status {
         Ok(res) => res,
         Err(AppError { err_type, message }) => {
