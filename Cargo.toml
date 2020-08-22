@@ -18,3 +18,4 @@ serde_derive = "1.0.102"
 base64 = "0.11.0"
 filter-city = { git = "https://github.com/stephaneworkspace/filter-city/" }
 city_time_zone_sqlite = { git = "https://github.com/stephaneworkspace/city_time_zone_sqlite/" }
+htmlescape = "0.3.1"
